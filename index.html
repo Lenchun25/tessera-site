@@ -1,0 +1,364 @@
+
+<!DOCTYPE html>
+
+<html lang="ru">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Грани единого: Тессера</title>
+<link href="favicon.ico" rel="icon"/>
+<style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f9f6f3;
+      color: #2d1f3a;
+    }
+    header {
+      padding: 4rem 2rem 2rem;
+      background: linear-gradient(to right, #dacdf3, #f4e9df);
+      text-align: center;
+    }
+    header h1 {
+      font-size: 2.5rem;
+      margin: 0;
+    }
+    header p {
+      font-size: 1.2rem;
+      margin: 1rem 0 0;
+    }
+    section.visual, section.compatibility, section.connection, section.pair {
+      text-align: center;
+      padding: 2rem;
+    }
+    .pair-display {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 2rem;
+      flex-wrap: wrap;
+    }
+    .tessera-tile {
+      width: 100px;
+      height: 100px;
+      background: linear-gradient(135deg, #d0b4f0, #f5e9ff);
+      clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-weight: bold;
+      font-size: 1rem;
+    }
+    .progress-bar {
+      width: 80%;
+      margin: 1rem auto;
+      background: #e0d2f7;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      width: 64%;
+      height: 20px;
+      background: #8152d0;
+    }
+    svg {
+      max-width: 90%;
+    }
+    form {
+      max-width: 500px;
+      margin: 0 auto;
+    }
+    form input, form textarea {
+      width: 100%;
+      padding: 0.75rem;
+      margin: 0.5rem 0;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 1rem;
+    }
+    form button {
+      background-color: #6a4ca3;
+      color: white;
+      padding: 0.75rem 2rem;
+      font-size: 1rem;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    footer {
+      text-align: center;
+      padding: 2rem;
+      font-size: 0.9rem;
+      color: #666;
+    }
+  </style>
+<style>
+    :root {
+      --bg: #f9f6f3;
+      --text: #2d1f3a;
+      --accent: #6a4ca3;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #1b1325;
+        --text: #eee5ff;
+        --accent: #9b7dfd;
+      }
+      body {
+        background-color: var(--bg);
+        color: var(--text);
+      }
+      header {
+        background: linear-gradient(to right, #3c2f58, #2a1f33);
+      }
+      .progress-bar {
+        background: #3d2e5f;
+      }
+      .progress-bar-fill {
+        background: var(--accent);
+      }
+      .tessera-tile {
+        background: linear-gradient(135deg, #533a7b, #8064b6);
+        color: #fff;
+      }
+      form input, form textarea {
+        background-color: #2d2342;
+        color: #f0e8ff;
+        border: 1px solid #5c4686;
+      }
+    }
+    .fade-in {
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeIn 1s ease forwards;
+    }
+    @keyframes fadeIn {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+      document.querySelectorAll("section").forEach((el, i) => {
+        el.classList.add("fade-in");
+        el.style.animationDelay = `${i * 0.2}s`;
+      });
+    });
+  </script>
+<style>
+  .fade-in {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.8s ease-out;
+  }
+  .fade-in.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .pulse-line {
+    stroke-dasharray: 5;
+    animation: dash 2s linear infinite;
+  }
+
+  @keyframes dash {
+    0% { stroke-dashoffset: 0; }
+    100% { stroke-dashoffset: 10; }
+  }
+
+  .aura {
+    fill: url(#gradAura);
+  }
+
+  .hover-glow:hover {
+    filter: drop-shadow(0 0 8px #a97aff);
+    transform: scale(1.05);
+    transition: 0.3s ease;
+  }
+
+  .progress-bar {
+    width: 100%;
+    background: #eee;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 10px;
+    width: 0;
+    background: #8e6fd4;
+    transition: width 1s ease;
+  }
+
+  .avatar-option {
+    display: inline-block;
+    padding: 0.5rem;
+    cursor: pointer;
+    border: 2px solid transparent;
+    border-radius: 10px;
+    margin: 0.5rem;
+  }
+
+  .avatar-option.selected {
+    border-color: #8e6fd4;
+    background: #f3e9ff;
+  }
+</style>
+<script>
+  // Fade-in Observer
+  const fader = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add("show");
+      }
+    });
+  });
+
+  window.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll(".fade-in").forEach(el => fader.observe(el));
+  });
+
+  // Test submission with progress and delay
+  function submitTestWithProgress(e) {
+    e.preventDefault();
+    const bar = document.getElementById("bar-fill");
+    bar.style.width = "100%";
+    const resultNode = document.getElementById("test-result");
+    resultNode.innerText = "🔍 Считываем вашу грань...";
+    setTimeout(() => {
+      const val = document.forms["minitest"].arch.value;
+      const output = {
+        "Интуиция": "Вы — человек, который живёт предчувствием...",
+        "Логика": "Вы мыслитель, стратег...",
+        "Эмоции": "Вы — сердце...",
+        "Духовность": "Вы соединены с высшим..."
+      };
+      resultNode.innerText = output[val] || "Мы пока ищем вашу уникальность...";
+    }, 2000);
+  }
+
+  // Архетип карта выбора
+  function selectArch(id) {
+    document.querySelectorAll(".avatar-option").forEach(el => el.classList.remove("selected"));
+    document.getElementById(id).classList.add("selected");
+    document.getElementById("match-output").innerText = "🔗 Ваша грань — " + id;
+  }
+</script>
+</head>
+<body>
+<header>
+<h1>Грани единого: Тессера</h1>
+<p>Платформа глубоких совпадений</p>
+</header>
+<section class="visual">
+<img alt="Мозаика" src="A_digital_abstract_image_features_a_geometric_mosa.png" width="80%"/>
+</section>
+<section class="connection">
+<h2>Невидимые связи</h2>
+<svg height="200" width="600">
+<circle cx="150" cy="100" fill="#b89fe6" r="30"></circle>
+<circle cx="450" cy="100" fill="#f3d5b5" r="30"></circle>
+<line stroke="#8152d0" stroke-dasharray="5,5" stroke-width="2" x1="180" x2="420" y1="100" y2="100"></line>
+<text x="120" y="160">Вы</text>
+<text x="420" y="160">Партнёр</text>
+</svg>
+</section>
+<section class="compatibility">
+<h2>Совместимость</h2>
+<p>Зодиак: ♎ Весы + ♓ Рыбы</p>
+<p>Психотип: Дипломат + Мечтатель</p>
+<div class="progress-bar">
+<div class="progress-bar-fill"></div>
+</div>
+</section>
+<section class="pair">
+<h2>Ваша пара — как две тессеры</h2>
+<div class="pair-display">
+<div class="tessera-tile">Анна</div>
+<div class="tessera-tile">Михаил</div>
+</div>
+</section>
+<section class="form">
+<h2>Связаться с нами</h2>
+<form data-netlify="true" method="POST" name="contact" netlify-honeypot="bot-field">
+<input name="form-name" type="hidden" value="contact"/>
+<p style="display:none;">
+<label>Don’t fill this out: <input name="bot-field"/></label>
+</p>
+<input name="name" placeholder="Ваше имя" required="" type="text"/>
+<input name="email" placeholder="Ваш email" required="" type="email"/>
+<textarea name="message" placeholder="Ваше сообщение" required=""></textarea>
+<button type="submit">Отправить</button>
+</form>
+</section>
+
+<section class="fade-in" id="profile-editor" style="padding: 2rem;">
+<h2>📝 Ваша анкета</h2>
+<form enctype="multipart/form-data" id="user-profile-form">
+<label>Ваше имя:<br/><input name="username" required="" type="text"/></label><br/><br/>
+<label>Дата рождения:<br/><input name="birthdate" required="" type="date"/></label><br/><br/>
+<label>Ваш архетип:<br/>
+<select name="archtype">
+<option value="Интуиция">Интуиция</option>
+<option value="Логика">Логика</option>
+<option value="Эмоции">Эмоции</option>
+<option value="Духовность">Духовность</option>
+</select>
+</label><br/><br/>
+<label>Загрузите ваше фото:<br/><input accept="image/*" name="profilephoto" type="file"/></label><br/><br/>
+<button type="submit">Сохранить анкету</button>
+</form>
+<div id="profile-preview" style="margin-top: 2rem;"></div>
+</section>
+<script>
+  document.getElementById("user-profile-form").addEventListener("submit", function(event) {
+    event.preventDefault();
+    const form = event.target;
+    const name = form.username.value;
+    const birth = form.birthdate.value;
+    const arch = form.archtype.value;
+    const photo = form.profilephoto.files[0];
+
+    let preview = "<h3>📌 Ваш профиль:</h3>";
+    preview += "<p><strong>Имя:</strong> " + name + "</p>";
+    preview += "<p><strong>Дата рождения:</strong> " + birth + "</p>";
+    preview += "<p><strong>Архетип:</strong> " + arch + "</p>";
+
+    if (photo) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const imgTag = "<img src='" + e.target.result + "' alt='Фото' style='max-width:200px;border-radius:10px;box-shadow:0 0 10px #ccc'>";
+        document.getElementById("profile-preview").innerHTML = preview + imgTag;
+      };
+      reader.readAsDataURL(photo);
+    } else {
+      document.getElementById("profile-preview").innerHTML = preview;
+    }
+  });
+</script>
+<footer>
+    © 2025 Грани единого: Тессера — Все права защищены.
+  
+  </footer>
+<section class="form">
+<h2>Истории пар</h2>
+<div style="max-width: 800px; margin: 0 auto; text-align: left; padding: 1rem;">
+<div style="margin-bottom: 1rem;">
+<strong>Анна + Михаил</strong><br/>
+        “Никогда не думала, что астрология и психология могут так точно сработать. Мы встретились в нужное время, как будто нас направили друг к другу.”
+      </div>
+<div style="margin-bottom: 1rem;">
+<strong>Дина + Алексей</strong><br/>
+        “Сначала скептически отнеслись, но совпадения по психотипу и ритмам были точными. Сегодня мы празднуем полгода отношений.”
+      </div>
+<div style="margin-bottom: 1rem;">
+<strong>Кира + Роман</strong><br/>
+        “‘Тессера’ — это не про случайность. Это был настоящий отклик души. Мы как две части одного узора.”
+      </div>
+</div>
+</section>
+</body>
+</html>
